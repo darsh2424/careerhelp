@@ -9,6 +9,8 @@ app.use(cors({ origin: '*' }));
 app.use(express.json())
 
 app.use("/api/v1/jobs", require("./v1/routes/job_route"))
+app.use("/api/v1/helpers", require("./v1/routes/helper_route"))
+
 
 const PORT = process.env.PORT
 
