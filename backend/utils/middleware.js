@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken")
 const dotenv = require("dotenv");
-const db = require("../config/database");
-const common = require("./common");
+const db = require("../config/db");
+const {getData,statusCode,responseCode} = require("./common");
 const { default: localizify, t } = require("localizify")
 const CryptoJS = require("crypto-js")
 const key = process.env.KEY || "";
@@ -56,7 +56,7 @@ const checkToken = async function (req, res, next) {
         }
 
         if (userToken[0] && userToken[0][0] && userToken[0][0].id) {
-            const user = await common.getData("tbl_user", { id: decoded.data.id })
+            const user = await getData("tbl_user", { id: decoded.data.id })
             if (user[0].is_active == 0 || user[0].is_deleted == 1) {
                 return sendResponse(req, res, 401, -1, "USER_LOCKED", {});
             }
@@ -156,7 +156,7 @@ const validateJoi = (schema, allowEmpty = false) => {
             next()
         } else {
             if (!allowEmpty && (!req.body || Object.keys(req.body).length === 0)) {
-                return sendResponse(req, res, 400, 2, "FIELDS_ARE_EMPTY", {});
+                return sendResponse(req, res, statusCode.badRequest, responseCode.validation_error, "FIELDS_ARE_EMPTY", {});
             }
             const { error } = schema.validate(req.body, {
                 abortEarly: false
@@ -172,7 +172,7 @@ const validateJoi = (schema, allowEmpty = false) => {
                     errors[fieldName] = formatErrorMessage(err.message, fieldName);
                 });
 
-                return sendResponse(req, res, 400, 2, "VALIDATION_ERROR", { errors });
+                return sendResponse(req, res, statusCode.badRequest, responseCode.validation_error, "VALIDATION_ERROR", { errors });
             }
 
             next();

@@ -28,6 +28,8 @@ CREATE TABLE users(
  password VARCHAR(255) NOT NULL,
  role ENUM('candidate','recruiter') NOT NULL,
  is_verified BOOLEAN DEFAULT FALSE,
+ is_active BOOLEAN DEFAULT TRUE,
+ is_deleted BOOLEAN DEFAULT FALSE,
  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -43,6 +45,8 @@ CREATE TABLE companies(
  country VARCHAR(255),
  verification_status ENUM('pending','verified','rejected') DEFAULT 'pending',
  created_by INT,
+ is_active BOOLEAN DEFAULT TRUE,
+ is_deleted BOOLEAN DEFAULT FALSE,
  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
  FOREIGN KEY(created_by) REFERENCES users(id) ON DELETE CASCADE
@@ -56,6 +60,8 @@ CREATE TABLE recruiter_profiles(
  designation VARCHAR(150),
  phone VARCHAR(20),
  subscription_type ENUM('free','premium') DEFAULT 'free',
+ is_active BOOLEAN DEFAULT TRUE,
+ is_deleted BOOLEAN DEFAULT FALSE,
  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
  FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -76,6 +82,8 @@ CREATE TABLE candidate_profiles(
  experience_years INT DEFAULT 0,
  employment_level_id INT,
  subscription_type ENUM('free','premium') DEFAULT 'free',
+  is_active BOOLEAN DEFAULT TRUE,
+ is_deleted BOOLEAN DEFAULT FALSE,
  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
  FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -104,16 +112,20 @@ CREATE TABLE jobs(
  employment_level_id INT,
  title VARCHAR(255) NOT NULL,
  description LONGTEXT,
- experience_years INT DEFAULT 0,
  salary_type ENUM('fixed','range','negotiable'),
  salary_period ENUM('hour','day','week','month','year'),
  salary_min DECIMAL(10,2),
  salary_max DECIMAL(10,2),
  openings INT DEFAULT 1,
  deadline DATE,
+ city VARCHAR(255),
+ state VARCHAR(255),
+ country VARCHAR(255),
  status ENUM('draft','active','closed','expired') DEFAULT 'draft',
  draft_step INT DEFAULT 1,
  published_at DATETIME,
+  is_active BOOLEAN DEFAULT TRUE,
+ is_deleted BOOLEAN DEFAULT FALSE,
  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
  FOREIGN KEY(company_id) REFERENCES companies(id),
@@ -163,6 +175,8 @@ CREATE TABLE applications(
  candidate_id INT NOT NULL,
  status ENUM('applied','screening','shortlisted','interview','offer_sent','selected','rejected','withdrawn') DEFAULT 'applied',
  cover_letter TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
+ is_deleted BOOLEAN DEFAULT FALSE,
  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
  UNIQUE(job_id,candidate_id),
@@ -228,3 +242,4 @@ INSERT INTO employment_levels(name) VALUES
 CREATE INDEX idx_jobs_status ON jobs(status);
 CREATE INDEX idx_jobs_company ON jobs(company_id);
 CREATE INDEX idx_jobs_industry ON jobs(industry_id);
+CREATE INDEX idx_jobs_location ON jobs(city, state, country);

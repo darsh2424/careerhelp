@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken")
 const dotenv = require("dotenv")
-const db = require("../config/database")
+const db = require("../config/db")
 dotenv.config()
 
 const common = {
@@ -39,8 +39,8 @@ const common = {
             return null
         }
     },
-    getUser: async(userId) => {
-        try{
+    getUser: async (userId) => {
+        try {
             let [user] = await db.query(`
                 SELECT u.id,p.full_name,u.email,p.mobile_number,p.job_role,
                 CASE 
@@ -52,16 +52,16 @@ const common = {
                 ON u.id=p.user_id and p.is_active=1 and p.is_delete=0
                 where u.id=? and u.is_active=1 and u.is_delete=0 and u.is_admin=0    
             `, [userId])
-            
-            if(!user || !user[0]) return null
+
+            if (!user || !user[0]) return null
             return user[0]
-        }catch (err) {
+        } catch (err) {
             console.log(err)
             return null
         }
     },
-    getAdmin: async(adminId) => {
-        try{
+    getAdmin: async (adminId) => {
+        try {
             let [user] = await db.query(`
                 SELECT u.id,u.email,
                 CASE 
@@ -72,12 +72,25 @@ const common = {
                 where u.id=? and u.is_active=1 and u.is_delete=0 and u.is_admin=1   
             `, [adminId])
 
-            if(!user || !user[0]) return null
+            if (!user || !user[0]) return null
             return user[0]
-        }catch (err) {
+        } catch (err) {
             console.log(err)
             return null
         }
+    },
+    statusCode: {
+        error: 500,
+        unauthorized: 401,
+        badRequest: 400,
+        success: 200
+    },
+    responseCode: {
+        unauthorized: -1,
+        error: 0,
+        success: 1,
+        validation_error: 2,
+        no_data_found: 3,
     }
 }
 

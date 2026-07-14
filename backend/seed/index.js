@@ -18,9 +18,31 @@ const { randomInt, pickOne, pickMany, weightedPick, futureDate, pastDateTime, ch
 const { generateSalary } = require('./helpers/salary');
 
 // Cities jobs can be posted in (mixed regardless of HQ, to add variety)
-const CITIES = [
-  'Ahmedabad', 'Gandhinagar', 'Surat', 'Rajkot', 'Vadodara', 'Mumbai', 'Pune',
-  'Bengaluru', 'Hyderabad', 'Chennai', 'Jaipur', 'Delhi', 'Noida', 'Gurugram', 'Indore',
+const LOCATIONS = [
+  { city: 'Ahmedabad', state: 'Gujarat', country: 'India' },
+  { city: 'Gandhinagar', state: 'Gujarat', country: 'India' },
+  { city: 'Surat', state: 'Gujarat', country: 'India' },
+  { city: 'Rajkot', state: 'Gujarat', country: 'India' },
+  { city: 'Vadodara', state: 'Gujarat', country: 'India' },
+
+  { city: 'Mumbai', state: 'Maharashtra', country: 'India' },
+  { city: 'Pune', state: 'Maharashtra', country: 'India' },
+
+  { city: 'Bengaluru', state: 'Karnataka', country: 'India' },
+
+  { city: 'Hyderabad', state: 'Telangana', country: 'India' },
+
+  { city: 'Chennai', state: 'Tamil Nadu', country: 'India' },
+
+  { city: 'Jaipur', state: 'Rajasthan', country: 'India' },
+
+  { city: 'Delhi', state: 'Delhi', country: 'India' },
+
+  { city: 'Noida', state: 'Uttar Pradesh', country: 'India' },
+
+  { city: 'Gurugram', state: 'Haryana', country: 'India' },
+
+  { city: 'Indore', state: 'Madhya Pradesh', country: 'India' },
 ];
 
 const JOB_TYPE_WEIGHTS = [
@@ -149,6 +171,8 @@ async function seedCompaniesAndRecruiters(conn, industryMap) {
       industry: company.industry,
       industryId: industryMap[company.industry],
       city: company.city,
+      state: company.state,
+      country: 'India',
     });
   }
 
@@ -168,10 +192,29 @@ function pickCompanyForTemplate(template, seededCompanies) {
   return pickOne(seededCompanies);
 }
 
-function pickCity(company) {
-  // 50% chance the job is posted in the company's home city, otherwise anywhere in the city pool
-  if (chance(50)) return company.city;
-  return pickOne(CITIES);
+function pickLocation(company) {
+  // 60% company HQ
+  if (chance(60)) {
+    return {
+      city: company.city,
+      state: company.state,
+      country: company.country,
+    };
+  }
+
+  // 25% another city in the same state
+  if (chance(62.5)) {
+    const sameState = LOCATIONS.filter(
+      l => l.state === company.state && l.city !== company.city
+    );
+
+    if (sameState.length) {
+      return pickOne(sameState);
+    }
+  }
+
+  // 15% anywhere in India
+  return pickOne(LOCATIONS);
 }
 
 async function insertJob(conn, { company, template, industryMap, jobTypeMap, workModeMap, employmentLevelMap }) {
@@ -182,21 +225,15 @@ async function insertJob(conn, { company, template, industryMap, jobTypeMap, wor
   const employmentLevel = jobType === 'Internship' ? 'Entry Level' : pickOne(template.employmentLevels);
 
   const status = weightedPick(JOB_STATUS_WEIGHTS);
-  const city = pickCity(company);
+  const { city, state, country } = pickLocation(company);
   const { salary_type, salary_period, salary_min, salary_max } = generateSalary(employmentLevel, jobType);
-
-  const experienceYears =
-    employmentLevel === 'Entry Level' ? 0 :
-    employmentLevel === 'Junior' ? randomInt(1, 2) :
-    employmentLevel === 'Mid Level' ? randomInt(3, 5) :
-    employmentLevel === 'Senior' ? randomInt(5, 8) :
-    randomInt(6, 10); // Lead / Manager
 
   const openings = randomInt(1, 5);
   const createdAt = pastDateTime(0, 40);
   const publishedAt = status === 'draft' ? null : createdAt;
   const deadline = futureDate(15, 60);
 
+  const draftStep = 1;
   const description =
     `${template.summary} Join ${company.name} in ${city} and work with a team that values ` +
     `ownership, learning, and shipping quality work.`;
@@ -204,9 +241,9 @@ async function insertJob(conn, { company, template, industryMap, jobTypeMap, wor
   const [jobResult] = await conn.query(
     `INSERT INTO jobs (
       company_id, recruiter_id, industry_id, job_type_id, work_mode_id, employment_level_id,
-      title, description, experience_years, salary_type, salary_period, salary_min, salary_max,
-      openings, deadline, status, draft_step, published_at, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 5, ?, ?)`,
+      title, description, salary_type, salary_period, salary_min, salary_max,
+      openings, deadline, city, state, country, status, draft_step, published_at, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       company.id,
       company.recruiterProfileId,
@@ -216,14 +253,17 @@ async function insertJob(conn, { company, template, industryMap, jobTypeMap, wor
       employmentLevelMap[employmentLevel],
       template.title,
       description,
-      experienceYears,
       salary_type,
       salary_period,
       salary_min,
       salary_max,
       openings,
       deadline,
+      city,
+      state,
+      country,
       status,
+      draftStep,
       publishedAt,
       createdAt,
     ]
