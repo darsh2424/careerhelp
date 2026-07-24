@@ -1,21 +1,27 @@
 export const normalizeResponse = (response) => {
   switch (response.code) {
     case 1:
-      return response.data;
+      return response;
+
+    case 2:
+      throw response;
 
     case 3:
       return null;
 
-    case 2:
-      throw new Error(response.message);
+    case 4:
+      throw response;
+    
+    case 5:
+      throw response;
 
     case 0:
-      throw new Error(response.message);
+      throw response;
 
     case -1:
-      throw new Error("Unauthorized");
+      throw { message: "Unauthorized" };
 
     default:
-      throw new Error("Unexpected Server Response");
+      throw { message: "Unexpected Server Response" };
   }
 };

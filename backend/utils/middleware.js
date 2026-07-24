@@ -46,8 +46,8 @@ const checkToken = async function (req, res, next) {
 
         // console.log(decoded)
         let userToken = await db.query(
-            `SELECT id FROM tbl_user 
-             WHERE id=? AND token=? AND is_active=1 AND is_delete=0`,
+            `SELECT id FROM tbl_login_tokens 
+             WHERE user_id=? AND token=?`,
             [decoded.data.id, bearerToken]
         );
 
@@ -56,7 +56,7 @@ const checkToken = async function (req, res, next) {
         }
 
         if (userToken[0] && userToken[0][0] && userToken[0][0].id) {
-            const user = await getData("tbl_user", { id: decoded.data.id })
+            const user = await getData("users", { id: decoded.data.id })
             if (user[0].is_active == 0 || user[0].is_deleted == 1) {
                 return sendResponse(req, res, 401, -1, "USER_LOCKED", {});
             }

@@ -7,9 +7,9 @@ export default function Hero() {
         <div className="flex flex-col items-center gap-12 md:flex-row md:justify-between">
 
           <div className="flex-1">
-            <div className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-2 text-sm font-medium text-blue-700">
+            {/* <div className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-2 text-sm font-medium text-blue-700">
               ✨ Trusted by Students & Recruiters
-            </div>
+            </div> */}
             <h1 className="mt-6 text-5xl font-extrabold leading-tight tracking-tight text-gray-900">
               Build Your Career,
               <br />

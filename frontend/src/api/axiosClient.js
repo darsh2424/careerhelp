@@ -1,11 +1,12 @@
 import axios from "axios";
+import { normalizeResponse } from "./responseHandler";
 // import CryptoJS from "crypto-js";
 
 // var key = CryptoJS.enc.Utf8.parse("X3Rjpx1cJ7snEjNsss1DRysIiQ2GhWqk");
 // var iv = CryptoJS.enc.Utf8.parse("X3Rjpx1cJ7snEjNs");
 
 const axiosClient = axios.create({
-  baseURL: 'http://localhost:9999/api/v1',
+  baseURL: 'http://localhost:8000/api/v1',
   headers: {
     "api-key": "careerhelp",
     "Content-Type": "application/json",
@@ -33,33 +34,38 @@ axiosClient.interceptors.response.use(
     //   showErrorMessage(response.data.message);
     // }
 
-    return response;
+    return normalizeResponse(response.data);
   },
 
   function (error) {
-    let res = error.response;
-    if (!error.response) {
-      return Promise.reject(error);
-    }
-
-    if (res.status == 401 || res.status === -1) {
+    if (error.response?.status === 401) {
       logOutRedirectCall();
-      // const response = bodyDecryption(res.data);
-      return res;
-    } else if (
-      res.status === 400 ||
-      res.status === 409 ||
-      res.status === 500 ||
-      res.status === 404
-    ) {
-      // const response = bodyDecryption(res.data);
-      return res;
-    } else {
-      console.error(
-        "Looks like there was a problem. Status Code: " + res.status
-      );
-      return Promise.reject(error);
     }
+    return Promise.reject(error);
+
+    // let res = error.response;
+    // if (!error.response) {
+    //   return Promise.reject(error);
+    // }
+
+    // if (res.status == 401 || res.status === -1) {
+    //   logOutRedirectCall();
+    //   // const response = bodyDecryption(res.data);
+    //   return res;
+    // } else if (
+    //   res.status === 400 ||
+    //   res.status === 409 ||
+    //   res.status === 500 ||
+    //   res.status === 404
+    // ) {
+    //   // const response = bodyDecryption(res.data);
+    //   return res;
+    // } else {
+    //   console.error(
+    //     "Looks like there was a problem. Status Code: " + res.status
+    //   );
+    //   return Promise.reject(error);
+    // }
   }
 );
 

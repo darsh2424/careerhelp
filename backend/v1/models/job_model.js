@@ -9,11 +9,11 @@ const list_jobs = async(req, res) => {
         if (industries && industries.length > 0) {
             for (industry of industries) {
                 if (typeof industry !== "number") {
-                    return sendResponse(req, res, statusCode.error, responseCode.error, { keyword: "INVALID_INDUSTRY", components: { resource: "Job Listing" } }, {})
+                    return sendResponse(req, res, statusCode.success, responseCode.error, { keyword: "INVALID_INDUSTRY", components: { resource: "Job Listing" } }, {})
                 }
                 const industryExists = await db.query(`SELECT id FROM industries WHERE id=? AND is_active=1 AND is_delete=0`, [industry])
                 if (!industryExists.length) {
-                    return sendResponse(req, res, statusCode.error, responseCode.error, { keyword: "INVALID_INDUSTRY", components: { resource: "Job Listing" } }, {})
+                    return sendResponse(req, res, statusCode.success, responseCode.error, { keyword: "INVALID_INDUSTRY", components: { resource: "Job Listing" } }, {})
                 }
             }
             searchObj.industries = industries
@@ -21,11 +21,11 @@ const list_jobs = async(req, res) => {
         if (job_types && job_types.length > 0) {
             for (job_type of job_types) {
                 if (typeof job_type !== "number") {
-                    return sendResponse(req, res, statusCode.error, responseCode.error, { keyword: "INVALID_JOB_TYPE", components: { resource: "Job Listing" } }, {})
+                    return sendResponse(req, res, statusCode.success, responseCode.error, { keyword: "INVALID_JOB_TYPE", components: { resource: "Job Listing" } }, {})
                 }
                 const jobTypeExists = await db.query(`SELECT id FROM job_types WHERE id=? AND is_active=1 AND is_delete=0`, [job_type])
                 if (!jobTypeExists.length) {
-                    return sendResponse(req, res, statusCode.error, responseCode.error, { keyword: "INVALID_JOB_TYPE", components: { resource: "Job Listing" } }, {})
+                    return sendResponse(req, res, statusCode.success, responseCode.error, { keyword: "INVALID_JOB_TYPE", components: { resource: "Job Listing" } }, {})
                 }
             }
             searchObj.job_types = job_types
@@ -33,11 +33,11 @@ const list_jobs = async(req, res) => {
         if (work_modes && work_modes.length > 0) {
             for (work_mode of work_modes) {
                 if (typeof work_mode !== "number") {
-                    return sendResponse(req, res, statusCode.error, responseCode.error, { keyword: "INVALID_WORK_MODE", components: { resource: "Job Listing" } }, {})
+                    return sendResponse(req, res, statusCode.success, responseCode.error, { keyword: "INVALID_WORK_MODE", components: { resource: "Job Listing" } }, {})
                 }
                 const workModeExists = await db.query(`SELECT id FROM work_modes WHERE id=? AND is_active=1 AND is_delete=0`, [work_mode])
                 if (!workModeExists.length) {
-                    return sendResponse(req, res, statusCode.error, responseCode.error, { keyword: "INVALID_WORK_MODE", components: { resource: "Job Listing" } }, {})
+                    return sendResponse(req, res, statusCode.success, responseCode.error, { keyword: "INVALID_WORK_MODE", components: { resource: "Job Listing" } }, {})
                 }
             }
             searchObj.work_modes = work_modes
@@ -45,11 +45,11 @@ const list_jobs = async(req, res) => {
         if (employment_levels && employment_levels.length > 0) {
             for (employment_level of employment_levels) {
                 if (typeof employment_level !== "number") {
-                    return sendResponse(req, res, statusCode.error, responseCode.error, { keyword: "INVALID_EMPLOYMENT_LEVEL", components: { resource: "Job Listing" } }, {})
+                    return sendResponse(req, res, statusCode.success, responseCode.error, { keyword: "INVALID_EMPLOYMENT_LEVEL", components: { resource: "Job Listing" } }, {})
                 }
                 const employmentLevelExists = await db.query(`SELECT id FROM employment_levels WHERE id=? AND is_active=1 AND is_delete=0`, [employment_level])
                 if (!employmentLevelExists.length) {
-                    return sendResponse(req, res, statusCode.error, responseCode.error, { keyword: "INVALID_EMPLOYMENT_LEVEL", components: { resource: "Job Listing" } }, {})
+                    return sendResponse(req, res, statusCode.success, responseCode.error, { keyword: "INVALID_EMPLOYMENT_LEVEL", components: { resource: "Job Listing" } }, {})
                 }
             }
             searchObj.employment_levels = employment_levels
@@ -198,7 +198,7 @@ const detail_job = async(req, res) => {
 
         const [isJobExists] = await db.query(`SELECT id FROM jobs WHERE id=? AND is_active=1 AND is_deleted=0`, [jobId])
         if (!isJobExists.length) {
-            return sendResponse(req, res, statusCode.error, responseCode.no_data_found, { keyword: "NO_DATA_FOUND", components: { resource: "Job Detail" } }, {})
+            return sendResponse(req, res, statusCode.success, responseCode.no_data_found, { keyword: "NO_DATA_FOUND", components: { resource: "Job Detail" } }, {})
         }
 
         const [jobDetails] = await db.query(`SELECT
